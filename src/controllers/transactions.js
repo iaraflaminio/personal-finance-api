@@ -71,7 +71,37 @@ const listTransactions = async (req, res) => {
     }
 };
 
+const detailTransaction = async (req, res) => {
+    const { id } = req.params;
+    const { id: user_id } = req.user;
+
+    try {
+        const transaction = await knex('transactions')
+            .select(
+                'transactions.*',
+                'categories.name as category_name'
+            )
+            .join('categories', 'transactions.category_id', 'categories.id')
+            .where({ 
+                'transactions.id': id, 
+                'transactions.user_id': user_id 
+            })
+            .first();
+
+        if (!transaction) {
+            return res.status(404).json({ message: 'Transaction not found.' });
+        }
+
+        return res.json(transaction);
+        
+    } catch (error) {
+       console.error(error.message);
+        return res.status(500).json({ message: 'Internal server error.' });  
+    }
+};
+
 module.exports = {
     registerTransaction,
-    listTransactions
+    listTransactions,
+    detailTransaction
 }

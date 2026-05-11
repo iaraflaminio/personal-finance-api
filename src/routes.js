@@ -2,7 +2,7 @@ const express = require('express');
 const { listCategories } = require('./controllers/categories');
 const { registerUser, login, detailUser, updateUser } = require('./controllers/users');
 const verifyLogin = require('./middlewares/auth');
-const { registerTransaction, listTransactions } = require('./controllers/transactions');
+const { registerTransaction, listTransactions, detailTransaction } = require('./controllers/transactions');
 
 const routes = express.Router();
 
@@ -25,5 +25,6 @@ routes.get('/categories', listCategories);
 //transactions
 routes.post('/newtransaction', registerTransaction);
 routes.get('/transactions', listTransactions);
+routes.get('/transaction/:id', detailTransaction);
 
 module.exports = routes;
