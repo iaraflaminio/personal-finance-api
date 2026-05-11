@@ -72,7 +72,12 @@ const login = async (req, res) => {
     }
 };
 
+const detailUser = async (req, res) => {
+    return res.json(req.user);
+};
+
 module.exports = {
     registerUser,
-    login
-}
+    login,
+    detailUser
+};
