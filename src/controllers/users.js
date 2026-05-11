@@ -1,11 +1,12 @@
 const knex = require('../database/connection');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-        return res.status(400).json({message: 'All fields are required.'});
+        return res.status(400).json({ message: 'All fields are required.' });
     }
 
     try {
@@ -24,7 +25,7 @@ const registerUser = async (req, res) => {
         }).returning(['id', 'name', 'email']);
 
         if (!newUser) {
-            return res.status(400).json({ message: 'User not registered, try again'})
+            return res.status(400).json({ message: 'User not registered, try again' })
         }
 
         return res.status(201).json(newUser[0]);
@@ -32,8 +33,46 @@ const registerUser = async (req, res) => {
         console.log(error.message);
         return res.status(500).json({ message: 'Internal server error.' });
     }
-}
+};
+
+const login = async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required.' });
+    }
+
+    try {
+        const user = await knex('users').where({ email }).first();
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid email or password.' });
+        }
+
+        const isValidPassword = await bcrypt.compare(password, user.password);
+
+        if (!isValidPassword) {
+            return res.status(400).json({ message: 'Invalid email or password.' });
+        }
+
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+            expiresIn: '8h'
+        });
+
+        const { password: _, ...userData } = user;
+
+        return res.json({
+            user: userData,
+            token
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+};
 
 module.exports = {
-    registerUser
+    registerUser,
+    login
 }

@@ -1,6 +1,6 @@
 const express = require('express');
 const { listCategories } = require('./controllers/categories');
-const { registerUser } = require('./controllers/users');
+const { registerUser, login } = require('./controllers/users');
 
 const routes = express.Router();
 
@@ -9,9 +9,10 @@ routes.get('/', (req, res) => {
 });
 
 //users
-routes.post('/newuser', registerUser)
+routes.post('/newuser', registerUser);
+routes.post('/login', login);
 
 //categories route
-routes.get('/categories', listCategories)
+routes.get('/categories', listCategories);
 
 module.exports = routes;
