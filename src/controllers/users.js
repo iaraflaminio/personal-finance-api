@@ -76,8 +76,45 @@ const detailUser = async (req, res) => {
     return res.json(req.user);
 };
 
+const updateUser = async (req, res) => {
+    const { name, email, password } = req.body;
+    const { id } = req.user;
+
+    if (!name || !email || !password) {
+        return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    try {
+        const emailConflict = await knex('users')
+            .where({ email })
+            .whereNot({ id })
+            .first();
+
+            if (emailConflict) {
+                return res.status(400).json({ message: 'The email is already in use by another user.' });
+            }
+
+            const passwordHash = await bcrypt.hash(password, 10);
+
+            await knex('users')
+            .where({ id })
+            .update({
+                name,
+                email,
+                password: passwordHash
+            });
+
+            return res.status(204).send();
+
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
 module.exports = {
     registerUser,
     login,
-    detailUser
+    detailUser,
+    updateUser
 };

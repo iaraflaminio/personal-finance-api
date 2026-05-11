@@ -1,6 +1,6 @@
 const express = require('express');
 const { listCategories } = require('./controllers/categories');
-const { registerUser, login, detailUser } = require('./controllers/users');
+const { registerUser, login, detailUser, updateUser } = require('./controllers/users');
 const verifyLogin = require('./middlewares/auth');
 
 const routes = express.Router();
@@ -16,6 +16,7 @@ routes.post('/login', login);
 routes.use(verifyLogin);
 
 routes.get('/profile', detailUser);
+routes.put('/profileupdate', updateUser);
 
 //categories route
 routes.get('/categories', listCategories);
