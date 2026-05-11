@@ -2,6 +2,7 @@ const express = require('express');
 const { listCategories } = require('./controllers/categories');
 const { registerUser, login, detailUser, updateUser } = require('./controllers/users');
 const verifyLogin = require('./middlewares/auth');
+const { registerTransaction } = require('./controllers/transactions');
 
 const routes = express.Router();
 
@@ -20,5 +21,8 @@ routes.put('/profileupdate', updateUser);
 
 //categories route
 routes.get('/categories', listCategories);
+
+//transactions
+routes.post('/newtransaction', registerTransaction);
 
 module.exports = routes;
