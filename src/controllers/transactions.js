@@ -34,6 +34,44 @@ const registerTransaction = async (req, res) => {
     }
 };
 
+const listTransactions = async (req, res) => {
+    const { id: user_id } = req.user;
+    const { category_id, type } = req.query;
+
+    try {
+        const query = knex('transactions')
+            .select(
+                'transactions.id',
+                'transactions.description',
+                'transactions.amount',
+                'transactions.date',
+                'transactions.type',
+                'transactions.user_id',
+                'transactions.category_id',
+                'categories.name as category_name'
+            )
+            .join('categories', 'transactions.category_id', 'categories.id')
+            .where({ 'transactions.user_id': user_id });
+
+            if (category_id) {
+            query.where({ 'transactions.category_id': category_id });
+        }
+
+        if (type) {
+            query.where({ 'transactions.type': type });
+        }
+
+        const transactions = await query;
+
+        return res.json(transactions);
+
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
 module.exports = {
-    registerTransaction
+    registerTransaction,
+    listTransactions
 }
