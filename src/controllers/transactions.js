@@ -138,9 +138,54 @@ const getStatement = async (req, res) => {
     }
 };
 
+const updateTransaction = async (req, res) => {
+    const { id } = req.params;
+    const { id: user_id } = req.user;
+    const { description, amount, date, category_id, type } = req.body;
+
+    if (!description || !amount || !date || !category_id || !type) {
+        return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    if (type !== 'income' && type !== 'expense') {
+        return res.status(400).json({ message: 'Type must be either "income" or "expense".' });
+    }
+
+    try {
+        const transaction = await knex('transactions')
+            .where({ id, user_id })
+            .first();
+
+        if (!transaction) {
+            return res.status(404).json({ message: 'Transaction not found' });
+        }
+
+        const categoryExists = await knex('categories').where({ id: category_id }).first();
+        if (!categoryExists) {
+            return res.status(404).json({ message: 'Category not found.' })
+        }
+
+        await knex('transactions')
+            .where({ id, user_id })
+            .update({
+                description,
+                amount,
+                date,
+                category_id,
+                type
+            });
+
+        return res.status(204).send();
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
 module.exports = {
     registerTransaction,
     listTransactions,
     detailTransaction,
-    getStatement
+    getStatement,
+    updateTransaction
 }
