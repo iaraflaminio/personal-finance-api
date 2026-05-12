@@ -182,10 +182,36 @@ const updateTransaction = async (req, res) => {
     }
 };
 
+const deleteTransaction = async (req, res) => {
+    const { id } = req.params;
+    const { id: user_id } = req.user;
+
+    try {
+        const transaction = await knex('transactions')
+            .where({ id, user_id })
+            .first();
+
+        if (!transaction) {
+            return res.status(404).json({ message: 'Transaction not found' });
+        }
+
+        await knex('transactions')
+            .where({ id, user_id })
+            .del();
+
+        return res.status(204).send();
+
+    } catch (error) {
+        console.error(error.message);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
 module.exports = {
     registerTransaction,
     listTransactions,
     detailTransaction,
     getStatement,
-    updateTransaction
+    updateTransaction,
+    deleteTransaction
 }
